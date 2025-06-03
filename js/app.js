@@ -187,6 +187,7 @@ class ReliefTimer {
         // Initialize display
         this.updateDisplay();
         this.updateStats();
+        this.updateBackgroundTheme();
         
         // Set up PWA features
         this.setupPWA();
@@ -331,6 +332,27 @@ class ReliefTimer {
         this.dom.phase.textContent = displayText;
         this.dom.phase.classList.add('active');
         this.notifications.show(notificationText);
+        
+        // Update background theme based on phase
+        this.updateBackgroundTheme();
+    }
+
+    updateBackgroundTheme() {
+        // Remove all phase classes
+        document.body.classList.remove('phase-work', 'phase-microBreak', 'phase-exerciseBreak', 'phase-longBreak');
+        
+        // Add current phase class
+        const phaseClassMap = {
+            'work': 'phase-work',
+            'microBreak': 'phase-microBreak', 
+            'exerciseBreak': 'phase-exerciseBreak',
+            'longBreak': 'phase-longBreak'
+        };
+        
+        const phaseClass = phaseClassMap[this.state.currentPhase];
+        if (phaseClass) {
+            document.body.classList.add(phaseClass);
+        }
     }
 
     tick() {
@@ -377,6 +399,7 @@ class ReliefTimer {
         this.dom.phase.classList.remove('active');
         this.hideExercise();
         this.updateDisplay();
+        this.updateBackgroundTheme();
     }
 }
 

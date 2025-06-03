@@ -1,4 +1,18 @@
-/* Reset and base styles */
+/* Main container */
+.container {
+    background: var(--bg-secondary);
+    border-radius: 20px;
+    padding: 40px 30px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 0 0 1px var(--border-primary),
+                0 10px 40px var(--shadow-primary);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 1;
+}/* Reset and base styles */
 * {
     margin: 0;
     padding: 0;
@@ -43,6 +57,30 @@
         --surface-overlay: rgba(0, 0, 0, 0.03);
         --surface-hover: rgba(0, 0, 0, 0.05);
     }
+    
+    /* Light mode background animations */
+    body::before {
+        background: 
+            radial-gradient(circle at 20% 80%, rgba(67, 56, 202, 0.04) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(239, 68, 68, 0.04) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(59, 130, 246, 0.03) 0%, transparent 50%);
+    }
+    
+    body::after {
+        background-image: 
+            radial-gradient(2px 2px at 20px 30px, rgba(0, 0, 0, 0.05), transparent),
+            radial-gradient(2px 2px at 40px 70px, rgba(0, 0, 0, 0.03), transparent),
+            radial-gradient(1px 1px at 90px 40px, rgba(0, 0, 0, 0.04), transparent),
+            radial-gradient(1px 1px at 130px 80px, rgba(0, 0, 0, 0.02), transparent),
+            radial-gradient(2px 2px at 160px 30px, rgba(0, 0, 0, 0.03), transparent);
+    }
+    
+    .container::before {
+        background: 
+            radial-gradient(ellipse at 25% 25%, rgba(59, 130, 246, 0.02) 0%, transparent 50%),
+            radial-gradient(ellipse at 75% 75%, rgba(239, 68, 68, 0.02) 0%, transparent 50%),
+            radial-gradient(ellipse at 50% 10%, rgba(34, 197, 94, 0.015) 0%, transparent 40%);
+    }
 }
 
 /* Body and layout */
@@ -59,30 +97,189 @@ body {
     padding: calc(40px + env(safe-area-inset-top)) env(safe-area-inset-right) calc(40px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
     overscroll-behavior: contain;
     touch-action: manipulation;
-}
-
-/* Main container */
-.container {
-    background: var(--bg-secondary);
-    border-radius: 20px;
-    padding: 40px 30px;
-    width: 100%;
-    max-width: 380px;
-    box-shadow: 0 0 0 1px var(--border-primary),
-                0 10px 40px var(--shadow-primary);
     position: relative;
     overflow: hidden;
 }
 
-.container::before {
+/* Animated background layers */
+body::before,
+body::after {
     content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.02) 0%, transparent 70%);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     pointer-events: none;
+    z-index: -1;
+}
+
+/* Flowing waves layer */
+body::before {
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+    animation: flowingWaves 20s ease-in-out infinite;
+}
+
+/* Floating particles layer */
+body::after {
+    background-image: 
+        radial-gradient(3px 3px at 20px 30px, rgba(255, 255, 255, 0.15), transparent),
+        radial-gradient(2px 2px at 40px 70px, rgba(255, 255, 255, 0.1), transparent),
+        radial-gradient(2px 2px at 90px 40px, rgba(255, 255, 255, 0.12), transparent),
+        radial-gradient(1px 1px at 130px 80px, rgba(255, 255, 255, 0.08), transparent),
+        radial-gradient(3px 3px at 160px 30px, rgba(255, 255, 255, 0.1), transparent),
+        radial-gradient(1px 1px at 200px 60px, rgba(255, 255, 255, 0.06), transparent),
+        radial-gradient(2px 2px at 250px 20px, rgba(255, 255, 255, 0.09), transparent);
+    background-repeat: repeat;
+    background-size: 400px 300px;
+    animation: gentleDrift 60s ease-in-out infinite;
+}
+
+@keyframes flowingWaves {
+    0%, 100% {
+        transform: translateX(0) translateY(0) rotate(0deg);
+        filter: hue-rotate(0deg);
+    }
+    33% {
+        transform: translateX(-20px) translateY(-10px) rotate(1deg);
+        filter: hue-rotate(90deg);
+    }
+    66% {
+        transform: translateX(20px) translateY(10px) rotate(-1deg);
+        filter: hue-rotate(180deg);
+    }
+}
+
+/* Phase-based background variations */
+body.phase-work::before {
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(147, 197, 253, 0.1) 0%, transparent 50%);
+    animation: focusFlow 25s ease-in-out infinite;
+}
+
+body.phase-microBreak::before {
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(34, 197, 94, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(101, 163, 13, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(187, 247, 208, 0.1) 0%, transparent 50%);
+    animation: gentleBreeze 15s ease-in-out infinite;
+}
+
+body.phase-exerciseBreak::before {
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(251, 146, 60, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(245, 101, 101, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(252, 211, 77, 0.1) 0%, transparent 50%);
+    animation: energyWave 20s ease-in-out infinite;
+}
+
+body.phase-longBreak::before {
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(196, 181, 253, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(167, 139, 250, 0.1) 0%, transparent 50%);
+    animation: deepRelax 35s ease-in-out infinite;
+}
+
+/* Phase-specific animations */
+@keyframes focusFlow {
+    0%, 100% {
+        transform: translateX(0) translateY(0) rotate(0deg);
+        filter: hue-rotate(0deg) brightness(1);
+    }
+    50% {
+        transform: translateX(-5px) translateY(-5px) rotate(0.5deg);
+        filter: hue-rotate(15deg) brightness(1.1);
+    }
+}
+
+@keyframes gentleBreeze {
+    0%, 100% {
+        transform: translateX(0) translateY(0) rotate(0deg);
+        filter: hue-rotate(0deg) brightness(1);
+    }
+    33% {
+        transform: translateX(-15px) translateY(-8px) rotate(-0.5deg);
+        filter: hue-rotate(-10deg) brightness(1.05);
+    }
+    66% {
+        transform: translateX(15px) translateY(8px) rotate(0.5deg);
+        filter: hue-rotate(10deg) brightness(1.05);
+    }
+}
+
+@keyframes energyWave {
+    0%, 100% {
+        transform: translateX(0) translateY(0) rotate(0deg);
+        filter: hue-rotate(0deg) brightness(1);
+    }
+    25% {
+        transform: translateX(-10px) translateY(-12px) rotate(-1deg);
+        filter: hue-rotate(20deg) brightness(1.15);
+    }
+    75% {
+        transform: translateX(10px) translateY(12px) rotate(1deg);
+        filter: hue-rotate(-20deg) brightness(1.15);
+    }
+}
+
+@keyframes deepRelax {
+    0%, 100% {
+        transform: translateX(0) translateY(0) rotate(0deg);
+        filter: hue-rotate(0deg) brightness(0.9);
+    }
+    50% {
+        transform: translateX(-3px) translateY(-3px) rotate(0.2deg);
+        filter: hue-rotate(30deg) brightness(1);
+    }
+}
+    0% {
+        transform: translateX(0) translateY(0);
+        opacity: 0.8;
+    }
+    25% {
+        transform: translateX(-10px) translateY(-15px);
+        opacity: 1;
+    }
+    50% {
+        transform: translateX(5px) translateY(-25px);
+        opacity: 0.9;
+    }
+    75% {
+        transform: translateX(-5px) translateY(-35px);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(0) translateY(-50px);
+        opacity: 0.8;
+    }
+}
+
+/* Additional organic shapes */
+.container::before {
+    background: 
+        radial-gradient(ellipse at 25% 25%, rgba(100, 200, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 75% 75%, rgba(255, 100, 200, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 10%, rgba(200, 255, 100, 0.1) 0%, transparent 40%);
+    pointer-events: none;
+    animation: gentleRotation 40s linear infinite;
+}
+
+@keyframes gentleRotation {
+    0% {
+        transform: rotate(0deg) scale(1);
+    }
+    50% {
+        transform: rotate(180deg) scale(1.1);
+    }
+    100% {
+        transform: rotate(360deg) scale(1);
+    }
 }
 
 /* Header */
@@ -375,6 +572,13 @@ button.primary:focus {
     
     .progress-ring .progress {
         transition: none;
+    }
+    
+    /* Disable background animations for accessibility */
+    body::before,
+    body::after,
+    .container::before {
+        animation: none;
     }
 }
 
