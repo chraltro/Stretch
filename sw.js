@@ -3,7 +3,7 @@
  * Provides offline functionality and caching
  */
 
-const CACHE_NAME = 'relief-timer-v1';
+const CACHE_NAME = 'relief-timer-v2';
 const STATIC_CACHE_URLS = [
     './',
     './index.html',
@@ -56,50 +56,36 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Fetch event - serve from cache with fallback to network
+// Fetch event - stale-while-revalidate strategy
 self.addEventListener('fetch', (event) => {
     // Only handle same-origin requests
     if (!event.request.url.startsWith(self.location.origin)) {
         return;
     }
-    
+
     event.respondWith(
-        caches.match(event.request)
-            .then((cachedResponse) => {
-                if (cachedResponse) {
-                    console.log('[SW] Serving from cache:', event.request.url);
-                    return cachedResponse;
-                }
-                
-                console.log('[SW] Fetching from network:', event.request.url);
-                return fetch(event.request)
-                    .then((response) => {
-                        // Don't cache non-successful responses
-                        if (!response || response.status !== 200 || response.type !== 'basic') {
-                            return response;
-                        }
-                        
-                        // Clone the response before caching
-                        const responseToCache = response.clone();
-                        
-                        caches.open(CACHE_NAME)
-                            .then((cache) => {
-                                cache.put(event.request, responseToCache);
-                            });
-                        
-                        return response;
-                    })
-                    .catch((error) => {
-                        console.error('[SW] Fetch failed:', error);
-                        
-                        // Return a fallback response for HTML requests
-                        if (event.request.destination === 'document') {
-                            return caches.match('./index.html');
-                        }
-                        
-                        throw error;
-                    });
-            })
+        caches.open(CACHE_NAME).then((cache) => {
+            return cache.match(event.request).then((cachedResponse) => {
+                // Return cached response immediately and update cache in background
+                const fetchPromise = fetch(event.request).then((networkResponse) => {
+                    // Only cache successful responses
+                    if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+                        cache.put(event.request, networkResponse.clone());
+                    }
+                    return networkResponse;
+                }).catch((error) => {
+                    console.error('[SW] Fetch failed:', error);
+                    // Return a fallback response for HTML requests when offline
+                    if (event.request.destination === 'document') {
+                        return cache.match('./index.html');
+                    }
+                    throw error;
+                });
+
+                // Return cached response if available, otherwise wait for network
+                return cachedResponse || fetchPromise;
+            });
+        })
     );
 });
 
