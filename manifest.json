@@ -1,7 +1,7 @@
 {
-  "name": "Stretch",
-  "short_name": "Stretch",
-  "description": "A Pomodoro-style timer focused on preventing neck and shoulder strain with targeted exercises",
+  "name": "HVILA",
+  "short_name": "HVILA",
+  "description": "A Pomodoro-style timer focused on preventing neck and shoulder strain with targeted exercises. HVILA (Old Norse: rest/respite)",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#000000",
