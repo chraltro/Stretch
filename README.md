@@ -1,8 +1,8 @@
-# HVILA (Rest Timer)
+# Hvila (Rest Timer)
 
 A Progressive Web App (PWA) Pomodoro timer designed to help prevent neck and shoulder strain through guided exercise breaks. Built with vanilla JavaScript following modern web development best practices.
 
-**HVILA** (Old Norse: "rest" or "respite") - Your companion for balanced work-rest cycles.
+**Hvila** (Old Norse: "rest" or "respite") - Your companion for balanced work-rest cycles.
 
 ## Features
 
