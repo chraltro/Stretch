@@ -10,8 +10,7 @@ const STATIC_CACHE_URLS = [
     './css/styles.css',
     './js/app.js',
     './manifest.json',
-    './icons/icon-192.png',
-    './icons/icon-512.png'
+    './icons/logo.svg'
 ];
 
 // Install event - cache static assets
@@ -129,8 +128,8 @@ self.addEventListener('push', (event) => {
     const data = event.data.json();
     const options = {
         body: data.body || 'Time for a break!',
-        icon: './icons/icon-192.png',
-        badge: './icons/icon-192.png',
+        icon: './icons/logo.svg',
+        badge: './icons/logo.svg',
         vibrate: [200, 100, 200],
         tag: 'relief-timer-notification',
         data: data,

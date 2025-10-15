@@ -33,8 +33,8 @@
     --text-subtle: #666666;
     --border-primary: rgba(255, 255, 255, 0.1);
     --border-secondary: rgba(255, 255, 255, 0.2);
-    --accent-primary: #ffffff;
-    --accent-secondary: #f0f0f0;
+    --accent-primary: #06FFA5;
+    --accent-secondary: #33FFB8;
     --shadow-primary: rgba(0, 0, 0, 0.5);
     --surface-overlay: rgba(255, 255, 255, 0.03);
     --surface-hover: rgba(255, 255, 255, 0.05);
@@ -117,9 +117,9 @@ body::after {
 /* Flowing waves layer */
 body::before {
     background: 
-        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
-        radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+        radial-gradient(circle at 20% 80%, rgba(6, 255, 165, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(6, 255, 165, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(6, 255, 165, 0.1) 0%, transparent 50%);
     animation: flowingWaves 20s ease-in-out infinite;
 }
 
@@ -156,33 +156,33 @@ body::after {
 /* Phase-based background variations */
 body.phase-work::before {
     background: 
-        radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.2) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 40% 40%, rgba(147, 197, 253, 0.1) 0%, transparent 50%);
+        radial-gradient(circle at 20% 80%, rgba(6, 255, 165, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(6, 255, 165, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(6, 255, 165, 0.1) 0%, transparent 50%);
     animation: focusFlow 25s ease-in-out infinite;
 }
 
 body.phase-microBreak::before {
     background: 
-        radial-gradient(circle at 20% 80%, rgba(34, 197, 94, 0.2) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(101, 163, 13, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 40% 40%, rgba(187, 247, 208, 0.1) 0%, transparent 50%);
+        radial-gradient(circle at 20% 80%, rgba(6, 255, 165, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(6, 255, 165, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(6, 255, 165, 0.1) 0%, transparent 50%);
     animation: gentleBreeze 15s ease-in-out infinite;
 }
 
 body.phase-exerciseBreak::before {
     background: 
-        radial-gradient(circle at 20% 80%, rgba(251, 146, 60, 0.2) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(245, 101, 101, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 40% 40%, rgba(252, 211, 77, 0.1) 0%, transparent 50%);
+        radial-gradient(circle at 20% 80%, rgba(6, 255, 165, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(6, 255, 165, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(6, 255, 165, 0.1) 0%, transparent 50%);
     animation: energyWave 20s ease-in-out infinite;
 }
 
 body.phase-longBreak::before {
     background: 
-        radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.2) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(196, 181, 253, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 40% 40%, rgba(167, 139, 250, 0.1) 0%, transparent 50%);
+        radial-gradient(circle at 20% 80%, rgba(6, 255, 165, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(6, 255, 165, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(6, 255, 165, 0.1) 0%, transparent 50%);
     animation: deepRelax 35s ease-in-out infinite;
 }
 
@@ -263,9 +263,9 @@ body.phase-longBreak::before {
 /* Additional organic shapes */
 .container::before {
     background: 
-        radial-gradient(ellipse at 25% 25%, rgba(100, 200, 255, 0.15) 0%, transparent 50%),
-        radial-gradient(ellipse at 75% 75%, rgba(255, 100, 200, 0.15) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 10%, rgba(200, 255, 100, 0.1) 0%, transparent 40%);
+        radial-gradient(ellipse at 25% 25%, rgba(6, 255, 165, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 75% 75%, rgba(6, 255, 165, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 10%, rgba(6, 255, 165, 0.1) 0%, transparent 40%);
     pointer-events: none;
     animation: gentleRotation 40s linear infinite;
 }
