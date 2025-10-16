@@ -1,102 +1,82 @@
-# Hvila (Rest Timer)
+# Hvila - Rest Timer
 
-A Progressive Web App (PWA) Pomodoro timer designed to help prevent neck and shoulder strain through guided exercise breaks. Built with vanilla JavaScript following modern web development best practices.
+A Progressive Web App implementing the Pomodoro technique with guided exercise breaks designed to prevent neck and shoulder strain during extended work sessions.
 
-**Hvila** (Old Norse: "rest" or "respite") - Your companion for balanced work-rest cycles.
+**Hvila** (Old Norse: "rest" or "respite")
 
 ## Features
 
-- **Pomodoro-style timer** with neck/shoulder focused breaks
-- **Progressive exercise system** with micro-breaks, exercise breaks, and long breaks
-- **Offline functionality** through service worker caching
-- **Responsive design** that works on desktop and mobile
-- **Accessibility features** with ARIA labels and keyboard navigation
-- **Dark/light mode support** based on system preferences
-- **Push notifications** and vibration support
-- **Session tracking** with local storage persistence
+- Pomodoro-style work intervals with scheduled breaks
+- Guided neck and shoulder exercises during break periods
+- Three break types: micro-breaks (20s), exercise breaks (5min), long breaks (15min)
+- Session and exercise counter with local persistence
+- Offline functionality via service worker
+- Responsive design for desktop and mobile
+- Dark/light theme based on system preferences
+- Push notifications and vibration support
+- Keyboard navigation and screen reader support
+
+## Installation
+
+The app can be installed as a PWA on supported devices:
+
+1. Open the application in a browser
+2. Look for the install prompt or use the browser's "Add to Home Screen" option
+3. The app will function offline once installed
 
 ## Project Structure
 
 ```
-relief-timer/
-├── index.html              # Main HTML file with semantic structure
-├── manifest.json           # PWA manifest for app installation
-├── sw.js                   # Service worker for offline functionality
+hvila/
+├── index.html           # Semantic HTML structure
+├── manifest.json        # PWA configuration
+├── sw.js                # Service worker for offline support
 ├── css/
-│   └── styles.css          # All styles with CSS custom properties
+│   └── styles.css       # All styles with CSS custom properties
 ├── js/
-│   └── app.js              # Main application logic
-├── icons/                  # PWA icons (various sizes)
-│   ├── icon-72.png
-│   ├── icon-96.png
-│   ├── icon-128.png
-│   ├── icon-144.png
-│   ├── icon-152.png
-│   ├── icon-192.png
-│   ├── icon-384.png
-│   └── icon-512.png
-└── screenshots/            # PWA screenshots
-    ├── desktop.png
-    └── mobile.png
+│   └── app.js           # Application logic
+└── icons/               # PWA icons (72px to 512px)
 ```
 
-## Key Improvements Made
+## Technical Implementation
 
-### 1. **Semantic HTML Structure**
-- Used proper semantic elements (`<main>`, `<header>`, `<section>`, `<footer>`)
-- Added ARIA labels and live regions for accessibility
-- Improved heading hierarchy
+### Architecture
 
-### 2. **Modular CSS Architecture**
-- Separated CSS into external file
-- Used CSS custom properties for theming
-- Implemented proper cascade and specificity
-- Added responsive design and accessibility features
+Built with vanilla JavaScript using a class-based pattern for state management and event handling. The timer logic is separated into distinct phases with configuration constants for easy adjustment.
 
-### 3. **Modern JavaScript Patterns**
-- Class-based architecture with separation of concerns
-- Configuration constants for easy maintenance
-- Proper error handling and logging
-- Memory management for intervals and event listeners
+### Accessibility
 
-### 4. **Progressive Web App Features**
-- Complete PWA manifest with proper metadata
-- Service worker for offline functionality and caching
-- Push notification support
-- App installation prompts
-
-### 5. **Accessibility Enhancements**
-- Screen reader support with ARIA attributes
+- ARIA live regions for screen reader announcements
+- Semantic HTML elements
 - Keyboard navigation support
-- High contrast mode support
-- Reduced motion preferences support
+- High contrast mode compatibility
+- Reduced motion support for animations
 
-### 6. **Performance Optimizations**
+### Performance
+
 - Efficient DOM element caching
-- Optimized animation and transition properties
-- Proper event delegation
+- CSS-based animations using transform and opacity
 - Minimal external dependencies
-
-## Installation
-
-1. Clone or download the project files
-2. Serve the files through a web server (required for PWA features)
-3. The app will be installable on supported devices
+- Optimized service worker caching strategy
 
 ## Browser Support
 
-- Modern browsers with ES6+ support
-- PWA features require HTTPS (except localhost)
-- Service workers supported in Chrome, Firefox, Safari, Edge
+Modern browsers with ES6+ support. PWA features require HTTPS in production (localhost exempt for development).
 
 ## Development
 
-The app is built with vanilla JavaScript and requires no build process. For development:
+No build process required. Serve the files through any web server:
 
-1. Use a local server to serve the files
-2. Enable developer tools for PWA debugging
-3. Test offline functionality by disabling network
+```bash
+# Example with Python
+python -m http.server 8000
+
+# Example with Node.js http-server
+npx http-server
+```
+
+For development with service worker features, use a local HTTPS server or rely on localhost exceptions.
 
 ## License
 
-This project is open source and available under the MIT License.
+MIT
