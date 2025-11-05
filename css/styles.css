@@ -598,6 +598,301 @@ button.primary:focus {
     }
 }
 
+/* Goal Progress Bar */
+.goal-progress-container {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.goal-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-subtle);
+    margin-bottom: 8px;
+}
+
+.goal-bar {
+    background: var(--surface-overlay);
+    border: 1px solid var(--border-primary);
+    border-radius: 8px;
+    height: 8px;
+    overflow: hidden;
+    position: relative;
+}
+
+.goal-fill {
+    background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    height: 100%;
+    width: 0%;
+    transition: width 0.5s ease;
+    border-radius: 8px;
+}
+
+/* Keyboard Hints */
+.keyboard-hints {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-primary);
+}
+
+.keyboard-hints summary {
+    cursor: pointer;
+    user-select: none;
+    text-align: center;
+    color: var(--text-subtle);
+    font-size: 13px;
+    padding: 8px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.keyboard-hints summary:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+}
+
+.keyboard-hints dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px 16px;
+    margin-top: 12px;
+    font-size: 13px;
+}
+
+.keyboard-hints dt {
+    font-family: monospace;
+    background: var(--surface-overlay);
+    border: 1px solid var(--border-primary);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.keyboard-hints dd {
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+}
+
+/* Settings Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-content {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 16px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border-bottom: 1px solid var(--border-primary);
+}
+
+.modal-header h2 {
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 32px;
+    cursor: pointer;
+    padding: 0;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    line-height: 1;
+}
+
+.close-btn:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+    transform: rotate(90deg);
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-footer {
+    padding: 20px 24px;
+    border-top: 1px solid var(--border-primary);
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+/* Settings Form */
+.setting-group {
+    margin-bottom: 20px;
+}
+
+.setting-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.setting-group label input[type="checkbox"] {
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+.setting-group select,
+.setting-group input[type="number"] {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-secondary);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.setting-group select:focus,
+.setting-group input[type="number"]:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(6, 255, 165, 0.1);
+}
+
+.setting-group input[type="range"] {
+    width: calc(100% - 60px);
+    margin-right: 10px;
+    accent-color: var(--accent-primary);
+}
+
+.setting-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent-primary);
+}
+
+#volumeValue {
+    display: inline-block;
+    min-width: 40px;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+/* Button Styles */
+.primary-btn {
+    background: var(--accent-primary);
+    color: var(--bg-primary);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.primary-btn:hover {
+    background: var(--accent-secondary);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(6, 255, 165, 0.3);
+}
+
+.primary-btn:active {
+    transform: translateY(0);
+}
+
+.secondary-btn {
+    background: var(--surface-overlay);
+    color: var(--text-primary);
+    border: 1px solid var(--border-secondary);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-right: 8px;
+}
+
+.secondary-btn:hover {
+    background: var(--surface-hover);
+    border-color: var(--text-primary);
+}
+
+.secondary-btn:active {
+    transform: scale(0.98);
+}
+
+/* Settings Button Enhancement */
+#settingsBtn {
+    background: transparent;
+    border: 1px solid var(--border-secondary);
+    padding: 14px 20px;
+    font-size: 18px;
+}
+
+#settingsBtn:hover {
+    background: var(--surface-hover);
+    transform: rotate(90deg);
+}
+
 /* Wayfinder Logo Link */
 .wayfinder-link {
     position: fixed;
@@ -619,6 +914,7 @@ button.primary:focus {
     display: block;
 }
 
+/* Responsive Styles for New Features */
 @media (max-width: 480px) {
     .wayfinder-link {
         bottom: 15px;
@@ -628,5 +924,29 @@ button.primary:focus {
     .wayfinder-link img {
         width: 40px;
         height: 40px;
+    }
+
+    .modal-content {
+        max-height: 95vh;
+        border-radius: 12px;
+    }
+
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 16px;
+    }
+
+    .stats {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+    }
+
+    .keyboard-hints dl {
+        font-size: 12px;
+    }
+
+    .setting-group input[type="range"] {
+        width: calc(100% - 50px);
     }
 }
