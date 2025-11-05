@@ -14,7 +14,113 @@ const DEFAULT_CONFIG = {
     LONG_BREAK: 15 * 60,       // 15 minutes
     STORAGE_KEY: 'timerState',
     SETTINGS_KEY: 'timerSettings',
-    CIRCUMFERENCE: 2 * Math.PI * 100
+    HISTORY_KEY: 'sessionHistory',
+    ACHIEVEMENTS_KEY: 'achievements',
+    CIRCUMFERENCE: 2 * Math.PI * 100,
+    MAX_HISTORY_ENTRIES: 100
+};
+
+/**
+ * Achievement definitions
+ * @constant {Object}
+ */
+const ACHIEVEMENTS = {
+    firstSession: {
+        id: 'firstSession',
+        name: 'Getting Started',
+        description: 'Complete your first work session',
+        icon: '🎯',
+        check: (stats) => stats.sessions >= 1
+    },
+    streak3: {
+        id: 'streak3',
+        name: '3-Day Warrior',
+        description: 'Maintain a 3-day streak',
+        icon: '🔥',
+        check: (stats, streak) => streak.current >= 3
+    },
+    streak7: {
+        id: 'streak7',
+        name: 'Week Champion',
+        description: 'Maintain a 7-day streak',
+        icon: '⭐',
+        check: (stats, streak) => streak.current >= 7
+    },
+    streak30: {
+        id: 'streak30',
+        name: 'Monthly Master',
+        description: 'Maintain a 30-day streak',
+        icon: '👑',
+        check: (stats, streak) => streak.current >= 30
+    },
+    sessions25: {
+        id: 'sessions25',
+        name: 'Quarter Century',
+        description: 'Complete 25 sessions',
+        icon: '💪',
+        check: (stats) => stats.sessions >= 25
+    },
+    sessions100: {
+        id: 'sessions100',
+        name: 'Century Club',
+        description: 'Complete 100 sessions',
+        icon: '💯',
+        check: (stats) => stats.sessions >= 100
+    },
+    exercises50: {
+        id: 'exercises50',
+        name: 'Flexibility Master',
+        description: 'Complete 50 exercise breaks',
+        icon: '🧘',
+        check: (stats) => stats.exercises >= 50
+    },
+    dailyGoal: {
+        id: 'dailyGoal',
+        name: 'Daily Champion',
+        description: 'Reach your daily goal',
+        icon: '🏆',
+        check: (stats, streak, settings) => {
+            const today = new Date().toDateString();
+            return streak.lastDate === today && stats.sessions >= settings.dailyGoal;
+        }
+    },
+    earlyBird: {
+        id: 'earlyBird',
+        name: 'Early Bird',
+        description: 'Start a session before 7 AM',
+        icon: '🌅',
+        check: () => false // Checked in real-time
+    },
+    nightOwl: {
+        id: 'nightOwl',
+        name: 'Night Owl',
+        description: 'Complete a session after 10 PM',
+        icon: '🦉',
+        check: () => false // Checked in real-time
+    }
+};
+
+/**
+ * Notification sound options
+ * @constant {Object}
+ */
+const SOUND_OPTIONS = {
+    bell: {
+        name: 'Bell',
+        file: 'bell.wav'
+    },
+    chime: {
+        name: 'Chime',
+        file: 'chime.wav'
+    },
+    gong: {
+        name: 'Gong',
+        file: 'gong.wav'
+    },
+    subtle: {
+        name: 'Subtle Ping',
+        file: 'ping.wav'
+    }
 };
 
 /**
@@ -132,6 +238,250 @@ const EXERCISES = {
 };
 
 /**
+ * Session history manager
+ * @class
+ */
+class SessionHistory {
+    constructor() {
+        this.sessions = [];
+        this.load();
+    }
+
+    /**
+     * Add a session to history
+     * @param {Object} session - Session data
+     */
+    addSession(session) {
+        this.sessions.unshift({
+            ...session,
+            timestamp: Date.now(),
+            date: new Date().toISOString()
+        });
+
+        // Keep only the last MAX_HISTORY_ENTRIES
+        if (this.sessions.length > CONFIG.MAX_HISTORY_ENTRIES) {
+            this.sessions = this.sessions.slice(0, CONFIG.MAX_HISTORY_ENTRIES);
+        }
+
+        this.save();
+    }
+
+    /**
+     * Get sessions for a specific date
+     * @param {Date} date - Date to filter by
+     * @returns {Array} Sessions for that date
+     */
+    getSessionsForDate(date) {
+        const dateStr = date.toDateString();
+        return this.sessions.filter(s => {
+            const sessionDate = new Date(s.date).toDateString();
+            return sessionDate === dateStr;
+        });
+    }
+
+    /**
+     * Get sessions for the last N days
+     * @param {number} days - Number of days
+     * @returns {Array} Sessions from last N days
+     */
+    getRecentSessions(days = 7) {
+        const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+        return this.sessions.filter(s => s.timestamp >= cutoff);
+    }
+
+    /**
+     * Calculate total time spent
+     * @param {number} days - Number of days to calculate
+     * @returns {Object} Time statistics
+     */
+    calculateTimeStats(days = 7) {
+        const recent = this.getRecentSessions(days);
+        let totalWork = 0;
+        let totalBreak = 0;
+
+        recent.forEach(session => {
+            if (session.type === 'work') {
+                totalWork += session.duration;
+            } else {
+                totalBreak += session.duration;
+            }
+        });
+
+        return {
+            totalWork,
+            totalBreak,
+            total: totalWork + totalBreak,
+            workPercentage: totalWork / (totalWork + totalBreak) * 100 || 0
+        };
+    }
+
+    /**
+     * Get statistics by day of week
+     * @returns {Object} Activity by day
+     */
+    getActivityByDayOfWeek() {
+        const byDay = [0, 0, 0, 0, 0, 0, 0]; // Sun-Sat
+        this.sessions.forEach(session => {
+            const day = new Date(session.date).getDay();
+            byDay[day]++;
+        });
+        return byDay;
+    }
+
+    /**
+     * Save history to localStorage
+     */
+    save() {
+        try {
+            localStorage.setItem(CONFIG.HISTORY_KEY, JSON.stringify(this.sessions));
+        } catch (error) {
+            console.warn('Could not save history:', error);
+        }
+    }
+
+    /**
+     * Load history from localStorage
+     */
+    load() {
+        try {
+            const saved = localStorage.getItem(CONFIG.HISTORY_KEY);
+            if (saved) {
+                this.sessions = JSON.parse(saved);
+            }
+        } catch (error) {
+            console.warn('Could not load history:', error);
+        }
+    }
+
+    /**
+     * Clear all history
+     */
+    clear() {
+        this.sessions = [];
+        this.save();
+    }
+}
+
+/**
+ * Achievement manager
+ * @class
+ */
+class AchievementManager {
+    constructor() {
+        this.unlocked = new Set();
+        this.load();
+    }
+
+    /**
+     * Check and unlock achievements
+     * @param {Object} stats - User statistics
+     * @param {Object} streak - Streak data
+     * @param {Object} settings - User settings
+     * @returns {Array} Newly unlocked achievements
+     */
+    checkAchievements(stats, streak, settings) {
+        const newlyUnlocked = [];
+
+        Object.values(ACHIEVEMENTS).forEach(achievement => {
+            if (!this.unlocked.has(achievement.id)) {
+                if (achievement.check(stats, streak, settings)) {
+                    this.unlock(achievement.id);
+                    newlyUnlocked.push(achievement);
+                }
+            }
+        });
+
+        return newlyUnlocked;
+    }
+
+    /**
+     * Check time-based achievements
+     * @returns {Array} Newly unlocked achievements
+     */
+    checkTimeBasedAchievements() {
+        const hour = new Date().getHours();
+        const newlyUnlocked = [];
+
+        // Early Bird (before 7 AM)
+        if (hour < 7 && !this.unlocked.has('earlyBird')) {
+            this.unlock('earlyBird');
+            newlyUnlocked.push(ACHIEVEMENTS.earlyBird);
+        }
+
+        // Night Owl (after 10 PM)
+        if (hour >= 22 && !this.unlocked.has('nightOwl')) {
+            this.unlock('nightOwl');
+            newlyUnlocked.push(ACHIEVEMENTS.nightOwl);
+        }
+
+        return newlyUnlocked;
+    }
+
+    /**
+     * Unlock an achievement
+     * @param {string} id - Achievement ID
+     */
+    unlock(id) {
+        this.unlocked.add(id);
+        this.save();
+    }
+
+    /**
+     * Check if achievement is unlocked
+     * @param {string} id - Achievement ID
+     * @returns {boolean} True if unlocked
+     */
+    isUnlocked(id) {
+        return this.unlocked.has(id);
+    }
+
+    /**
+     * Get all unlocked achievements
+     * @returns {Array} Array of unlocked achievements
+     */
+    getUnlocked() {
+        return Array.from(this.unlocked).map(id =>
+            Object.values(ACHIEVEMENTS).find(a => a.id === id)
+        ).filter(Boolean);
+    }
+
+    /**
+     * Get completion percentage
+     * @returns {number} Percentage of achievements unlocked
+     */
+    getCompletionPercentage() {
+        const total = Object.keys(ACHIEVEMENTS).length;
+        const unlocked = this.unlocked.size;
+        return (unlocked / total * 100).toFixed(1);
+    }
+
+    /**
+     * Save unlocked achievements to localStorage
+     */
+    save() {
+        try {
+            localStorage.setItem(CONFIG.ACHIEVEMENTS_KEY, JSON.stringify(Array.from(this.unlocked)));
+        } catch (error) {
+            console.warn('Could not save achievements:', error);
+        }
+    }
+
+    /**
+     * Load unlocked achievements from localStorage
+     */
+    load() {
+        try {
+            const saved = localStorage.getItem(CONFIG.ACHIEVEMENTS_KEY);
+            if (saved) {
+                this.unlocked = new Set(JSON.parse(saved));
+            }
+        } catch (error) {
+            console.warn('Could not load achievements:', error);
+        }
+    }
+}
+
+/**
  * Settings manager for user preferences
  * @class
  */
@@ -140,10 +490,12 @@ class Settings {
         this.profile = 'standard';
         this.soundEnabled = true;
         this.soundVolume = 0.7;
+        this.soundType = 'bell';
         this.notificationsEnabled = true;
         this.autoStartBreaks = false;
         this.autoStartWork = false;
         this.dailyGoal = 8; // sessions per day
+        this.theme = 'auto'; // auto, light, dark
         this.customTimes = { ...TIMER_PROFILES.standard };
     }
 
@@ -156,10 +508,12 @@ class Settings {
                 profile: this.profile,
                 soundEnabled: this.soundEnabled,
                 soundVolume: this.soundVolume,
+                soundType: this.soundType,
                 notificationsEnabled: this.notificationsEnabled,
                 autoStartBreaks: this.autoStartBreaks,
                 autoStartWork: this.autoStartWork,
                 dailyGoal: this.dailyGoal,
+                theme: this.theme,
                 customTimes: this.customTimes
             }));
         } catch (error) {
@@ -377,7 +731,7 @@ class DOMElements {
 class NotificationManager {
     constructor(settings) {
         this.settings = settings;
-        this.bellSound = null;
+        this.sound = null;
         this.initSound();
         this.requestPermission();
     }
@@ -387,10 +741,25 @@ class NotificationManager {
      */
     initSound() {
         try {
-            this.bellSound = new Audio('bell.wav');
-            this.bellSound.volume = this.settings.soundVolume;
+            const soundOption = SOUND_OPTIONS[this.settings.soundType] || SOUND_OPTIONS.bell;
+            this.sound = new Audio(soundOption.file);
+            this.sound.volume = this.settings.soundVolume;
         } catch (error) {
             console.warn('Could not initialize sound:', error);
+        }
+    }
+
+    /**
+     * Update sound type
+     * @param {string} soundType - Sound type key
+     */
+    setSoundType(soundType) {
+        try {
+            const soundOption = SOUND_OPTIONS[soundType] || SOUND_OPTIONS.bell;
+            this.sound = new Audio(soundOption.file);
+            this.sound.volume = this.settings.soundVolume;
+        } catch (error) {
+            console.warn('Could not update sound type:', error);
         }
     }
 
@@ -399,8 +768,8 @@ class NotificationManager {
      * @param {number} volume - Volume level (0-1)
      */
     setVolume(volume) {
-        if (this.bellSound) {
-            this.bellSound.volume = Math.max(0, Math.min(1, volume));
+        if (this.sound) {
+            this.sound.volume = Math.max(0, Math.min(1, volume));
         }
     }
 
@@ -420,9 +789,9 @@ class NotificationManager {
      * @param {string} message - Message to display
      */
     show(message) {
-        // Play bell sound
-        if (this.settings.soundEnabled && this.bellSound) {
-            this.bellSound.play().catch(err => {
+        // Play notification sound
+        if (this.settings.soundEnabled && this.sound) {
+            this.sound.play().catch(err => {
                 console.warn('Error playing sound:', err);
             });
         }
@@ -474,11 +843,16 @@ class ReliefTimer {
     constructor() {
         this.settings = new Settings();
         this.state = new TimerState();
+        this.history = new SessionHistory();
+        this.achievements = new AchievementManager();
         this.dom = new DOMElements();
 
         // Load settings first
         this.settings.load();
         this.settings.applyProfile();
+
+        // Apply theme
+        this.applyTheme();
 
         // Initialize notifications with settings
         this.notifications = new NotificationManager(this.settings);
@@ -784,11 +1158,32 @@ class ReliefTimer {
         this.dom.phase.classList.remove('active');
 
         const wasWorking = this.state.currentPhase === 'work';
+        const sessionType = this.state.currentPhase;
+        const sessionDuration = this.state.totalTime;
+
+        // Log completed session to history
+        this.history.addSession({
+            type: sessionType,
+            duration: sessionDuration,
+            completed: true
+        });
 
         if (wasWorking) {
             this.state.sessionCount++;
             this.state.stats.sessions++;
             this.state.updateStreak();
+
+            // Check for time-based achievements when starting a session
+            const timeAchievements = this.achievements.checkTimeBasedAchievements();
+            this.showNewAchievements(timeAchievements);
+
+            // Check regular achievements
+            const newAchievements = this.achievements.checkAchievements(
+                this.state.stats,
+                this.state.streak,
+                this.settings
+            );
+            this.showNewAchievements(newAchievements);
 
             if (this.state.sessionCount % 4 === 0) {
                 // Long break after 4 sessions
@@ -821,6 +1216,48 @@ class ReliefTimer {
         this.updateStats();
         this.state.save();
         this.updateDisplay();
+    }
+
+    /**
+     * Show newly unlocked achievements
+     * @param {Array} achievements - Array of new achievements
+     */
+    showNewAchievements(achievements) {
+        achievements.forEach((achievement, index) => {
+            setTimeout(() => {
+                this.showAchievementNotification(achievement);
+            }, index * 2000); // Stagger notifications
+        });
+    }
+
+    /**
+     * Show achievement notification
+     * @param {Object} achievement - Achievement object
+     */
+    showAchievementNotification(achievement) {
+        const notification = document.getElementById('notification');
+        if (notification) {
+            notification.innerHTML = `
+                <div class="achievement-unlock">
+                    <div class="achievement-icon">${achievement.icon}</div>
+                    <div class="achievement-content">
+                        <div class="achievement-title">Achievement Unlocked!</div>
+                        <div class="achievement-name">${achievement.name}</div>
+                        <div class="achievement-desc">${achievement.description}</div>
+                    </div>
+                </div>
+            `;
+            notification.classList.add('show', 'achievement');
+
+            // Play special achievement sound if available
+            if (this.settings.soundEnabled && this.notifications.sound) {
+                this.notifications.sound.play().catch(() => {});
+            }
+
+            setTimeout(() => {
+                notification.classList.remove('show', 'achievement');
+            }, 5000);
+        }
     }
 
     setPhase(phase, time, displayText, notificationText) {
@@ -904,6 +1341,20 @@ class ReliefTimer {
     }
 
     /**
+     * Apply theme based on settings
+     */
+    applyTheme() {
+        document.body.classList.remove('theme-light', 'theme-dark');
+
+        if (this.settings.theme === 'light') {
+            document.body.classList.add('theme-light');
+        } else if (this.settings.theme === 'dark') {
+            document.body.classList.add('theme-dark');
+        }
+        // 'auto' uses system preference (no class needed)
+    }
+
+    /**
      * Open settings modal
      */
     openSettings() {
@@ -940,69 +1391,126 @@ class ReliefTimer {
     createSettingsModal() {
         const modalHTML = `
             <div id="settingsModal" class="modal">
-                <div class="modal-content">
+                <div class="modal-content large">
                     <div class="modal-header">
                         <h2>Settings</h2>
                         <button id="closeSettings" class="close-btn">&times;</button>
                     </div>
-                    <div class="modal-body">
-                        <form id="settingsForm">
-                            <div class="setting-group">
-                                <label for="profile">Timer Profile</label>
-                                <select id="profile" name="profile">
-                                    <option value="standard">Standard (25/5/15)</option>
-                                    <option value="deepFocus">Deep Focus (52/17/30)</option>
-                                    <option value="shortSprints">Short Sprints (15/3/10)</option>
-                                    <option value="custom">Custom</option>
-                                </select>
-                            </div>
 
-                            <div class="setting-group">
-                                <label>
-                                    <input type="checkbox" id="soundEnabled" name="soundEnabled">
-                                    Enable Sound
-                                </label>
-                            </div>
-
-                            <div class="setting-group">
-                                <label for="soundVolume">Sound Volume</label>
-                                <input type="range" id="soundVolume" name="soundVolume" min="0" max="1" step="0.1">
-                                <span id="volumeValue">70%</span>
-                            </div>
-
-                            <div class="setting-group">
-                                <label>
-                                    <input type="checkbox" id="notificationsEnabled" name="notificationsEnabled">
-                                    Enable Notifications
-                                </label>
-                            </div>
-
-                            <div class="setting-group">
-                                <label>
-                                    <input type="checkbox" id="autoStartBreaks" name="autoStartBreaks">
-                                    Auto-start Breaks
-                                </label>
-                            </div>
-
-                            <div class="setting-group">
-                                <label>
-                                    <input type="checkbox" id="autoStartWork" name="autoStartWork">
-                                    Auto-start Work Sessions
-                                </label>
-                            </div>
-
-                            <div class="setting-group">
-                                <label for="dailyGoal">Daily Goal (sessions)</label>
-                                <input type="number" id="dailyGoal" name="dailyGoal" min="1" max="20" value="8">
-                            </div>
-
-                            <div class="setting-group">
-                                <button type="button" id="exportData" class="secondary-btn">Export Data</button>
-                                <button type="button" id="importData" class="secondary-btn">Import Data</button>
-                                <input type="file" id="importFile" accept=".json" style="display: none;">
-                            </div>
-                        </form>
+                    <div class="modal-tabs">
+                        <button class="tab-btn active" data-tab="settings">⚙️ Settings</button>
+                        <button class="tab-btn" data-tab="achievements">🏆 Achievements</button>
+                        <button class="tab-btn" data-tab="history">📊 History</button>
+                        <button class="tab-btn" data-tab="analytics">📈 Analytics</button>
                     </div>
+
+                    <div class="modal-body">
+                        <!-- Settings Tab -->
+                        <div id="tab-settings" class="tab-content active">
+                            <form id="settingsForm">
+                                <div class="setting-group">
+                                    <label for="profile">Timer Profile</label>
+                                    <select id="profile" name="profile">
+                                        <option value="standard">Standard (25/5/15)</option>
+                                        <option value="deepFocus">Deep Focus (52/17/30)</option>
+                                        <option value="shortSprints">Short Sprints (15/3/10)</option>
+                                        <option value="custom">Custom</option>
+                                    </select>
+                                </div>
+
+                                <div class="setting-group">
+                                    <label for="theme">Theme</label>
+                                    <select id="theme" name="theme">
+                                        <option value="auto">Auto (System)</option>
+                                        <option value="light">Light</option>
+                                        <option value="dark">Dark</option>
+                                    </select>
+                                </div>
+
+                                <div class="setting-group">
+                                    <label>
+                                        <input type="checkbox" id="soundEnabled" name="soundEnabled">
+                                        Enable Sound
+                                    </label>
+                                </div>
+
+                                <div class="setting-group">
+                                    <label for="soundType">Notification Sound</label>
+                                    <select id="soundType" name="soundType">
+                                        <option value="bell">Bell</option>
+                                        <option value="chime">Chime</option>
+                                        <option value="gong">Gong</option>
+                                        <option value="subtle">Subtle Ping</option>
+                                    </select>
+                                </div>
+
+                                <div class="setting-group">
+                                    <label for="soundVolume">Sound Volume</label>
+                                    <input type="range" id="soundVolume" name="soundVolume" min="0" max="1" step="0.1">
+                                    <span id="volumeValue">70%</span>
+                                </div>
+
+                                <div class="setting-group">
+                                    <label>
+                                        <input type="checkbox" id="notificationsEnabled" name="notificationsEnabled">
+                                        Enable Notifications
+                                    </label>
+                                </div>
+
+                                <div class="setting-group">
+                                    <label>
+                                        <input type="checkbox" id="autoStartBreaks" name="autoStartBreaks">
+                                        Auto-start Breaks
+                                    </label>
+                                </div>
+
+                                <div class="setting-group">
+                                    <label>
+                                        <input type="checkbox" id="autoStartWork" name="autoStartWork">
+                                        Auto-start Work Sessions
+                                    </label>
+                                </div>
+
+                                <div class="setting-group">
+                                    <label for="dailyGoal">Daily Goal (sessions)</label>
+                                    <input type="number" id="dailyGoal" name="dailyGoal" min="1" max="20" value="8">
+                                </div>
+
+                                <div class="setting-group">
+                                    <button type="button" id="exportData" class="secondary-btn">Export Data</button>
+                                    <button type="button" id="importData" class="secondary-btn">Import Data</button>
+                                    <input type="file" id="importFile" accept=".json" style="display: none;">
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Achievements Tab -->
+                        <div id="tab-achievements" class="tab-content">
+                            <div class="achievements-header">
+                                <h3>Your Achievements</h3>
+                                <p class="completion-text">Completed: <span id="achievementProgress">0%</span></p>
+                            </div>
+                            <div id="achievementsList" class="achievements-grid"></div>
+                        </div>
+
+                        <!-- History Tab -->
+                        <div id="tab-history" class="tab-content">
+                            <div class="history-header">
+                                <h3>Recent Sessions</h3>
+                                <button type="button" id="clearHistory" class="secondary-btn small">Clear History</button>
+                            </div>
+                            <div id="historyList" class="history-list"></div>
+                        </div>
+
+                        <!-- Analytics Tab -->
+                        <div id="tab-analytics" class="tab-content">
+                            <div class="analytics-header">
+                                <h3>Your Progress</h3>
+                            </div>
+                            <div id="analyticsContent" class="analytics-content"></div>
+                        </div>
+                    </div>
+
                     <div class="modal-footer">
                         <button type="button" id="saveSettings" class="primary-btn">Save Settings</button>
                     </div>
@@ -1012,6 +1520,14 @@ class ReliefTimer {
 
         document.body.insertAdjacentHTML('beforeend', modalHTML);
 
+        // Add tab switching logic
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const tab = e.target.dataset.tab;
+                this.switchTab(tab);
+            });
+        });
+
         // Add event listeners
         document.getElementById('saveSettings')?.addEventListener('click', () => this.saveSettings());
         document.getElementById('closeSettings')?.addEventListener('click', () => this.closeSettings());
@@ -1020,6 +1536,7 @@ class ReliefTimer {
             document.getElementById('importFile')?.click();
         });
         document.getElementById('importFile')?.addEventListener('change', (e) => this.importData(e));
+        document.getElementById('clearHistory')?.addEventListener('click', () => this.clearHistory());
 
         // Volume slider real-time update
         document.getElementById('soundVolume')?.addEventListener('input', (e) => {
@@ -1027,6 +1544,182 @@ class ReliefTimer {
             document.getElementById('volumeValue').textContent = `${Math.round(value * 100)}%`;
             this.notifications.setVolume(parseFloat(value));
         });
+
+        // Theme preview
+        document.getElementById('theme')?.addEventListener('change', (e) => {
+            this.settings.theme = e.target.value;
+            this.applyTheme();
+        });
+
+        // Sound type preview
+        document.getElementById('soundType')?.addEventListener('change', (e) => {
+            this.settings.soundType = e.target.value;
+            this.notifications.setSoundType(e.target.value);
+            // Play preview
+            if (this.settings.soundEnabled) {
+                this.notifications.sound?.play().catch(() => {});
+            }
+        });
+    }
+
+    /**
+     * Switch between modal tabs
+     * @param {string} tabName - Tab to switch to
+     */
+    switchTab(tabName) {
+        // Update tab buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tab === tabName);
+        });
+
+        // Update tab content
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.toggle('active', content.id === `tab-${tabName}`);
+        });
+
+        // Populate tab content
+        if (tabName === 'achievements') {
+            this.populateAchievements();
+        } else if (tabName === 'history') {
+            this.populateHistory();
+        } else if (tabName === 'analytics') {
+            this.populateAnalytics();
+        }
+    }
+
+    /**
+     * Populate achievements tab
+     */
+    populateAchievements() {
+        const container = document.getElementById('achievementsList');
+        const progressSpan = document.getElementById('achievementProgress');
+
+        if (!container) return;
+
+        progressSpan.textContent = this.achievements.getCompletionPercentage() + '%';
+
+        container.innerHTML = '';
+
+        Object.values(ACHIEVEMENTS).forEach(achievement => {
+            const isUnlocked = this.achievements.isUnlocked(achievement.id);
+            const achievementCard = document.createElement('div');
+            achievementCard.className = `achievement-card ${isUnlocked ? 'unlocked' : 'locked'}`;
+            achievementCard.innerHTML = `
+                <div class="achievement-icon">${achievement.icon}</div>
+                <div class="achievement-info">
+                    <div class="achievement-name">${achievement.name}</div>
+                    <div class="achievement-desc">${achievement.description}</div>
+                    ${isUnlocked ? '<div class="achievement-badge">✓ Unlocked</div>' : '<div class="achievement-badge">🔒 Locked</div>'}
+                </div>
+            `;
+            container.appendChild(achievementCard);
+        });
+    }
+
+    /**
+     * Populate history tab
+     */
+    populateHistory() {
+        const container = document.getElementById('historyList');
+        if (!container) return;
+
+        const recentSessions = this.history.getRecentSessions(7);
+
+        if (recentSessions.length === 0) {
+            container.innerHTML = '<p class="empty-state">No session history yet. Start a timer to begin!</p>';
+            return;
+        }
+
+        container.innerHTML = '';
+
+        recentSessions.forEach(session => {
+            const date = new Date(session.date);
+            const sessionCard = document.createElement('div');
+            sessionCard.className = 'history-item';
+            sessionCard.innerHTML = `
+                <div class="history-icon">${session.type === 'work' ? '💼' : '☕'}</div>
+                <div class="history-info">
+                    <div class="history-type">${session.type === 'work' ? 'Work Session' : 'Break'}</div>
+                    <div class="history-date">${date.toLocaleString()}</div>
+                </div>
+                <div class="history-duration">${Math.round(session.duration / 60)} min</div>
+            `;
+            container.appendChild(sessionCard);
+        });
+    }
+
+    /**
+     * Populate analytics tab
+     */
+    populateAnalytics() {
+        const container = document.getElementById('analyticsContent');
+        if (!container) return;
+
+        const stats = this.history.calculateTimeStats(7);
+        const dayStats = this.history.getActivityByDayOfWeek();
+
+        const totalHours = (stats.total / 3600).toFixed(1);
+        const workHours = (stats.totalWork / 3600).toFixed(1);
+        const breakHours = (stats.totalBreak / 3600).toFixed(1);
+
+        container.innerHTML = `
+            <div class="analytics-section">
+                <h4>Last 7 Days</h4>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-number">${totalHours}h</div>
+                        <div class="stat-label">Total Time</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">${workHours}h</div>
+                        <div class="stat-label">Work Time</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">${breakHours}h</div>
+                        <div class="stat-label">Break Time</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">${stats.workPercentage.toFixed(0)}%</div>
+                        <div class="stat-label">Work Ratio</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="analytics-section">
+                <h4>Activity by Day</h4>
+                <div class="day-chart">
+                    ${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, i) => `
+                        <div class="day-bar">
+                            <div class="bar-fill" style="height: ${Math.min(100, dayStats[i] * 10)}%"></div>
+                            <div class="bar-label">${day}</div>
+                            <div class="bar-value">${dayStats[i]}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+
+            <div class="analytics-section">
+                <h4>Quick Stats</h4>
+                <ul class="quick-stats">
+                    <li>🎯 Total Sessions: ${this.state.stats.sessions}</li>
+                    <li>🧘 Exercise Breaks: ${this.state.stats.exercises}</li>
+                    <li>🔥 Current Streak: ${this.state.streak.current} days</li>
+                    <li>👑 Longest Streak: ${this.state.streak.longest} days</li>
+                    <li>📅 Sessions Today: ${this.history.getSessionsForDate(new Date()).length}</li>
+                </ul>
+            </div>
+        `;
+    }
+
+    /**
+     * Clear session history
+     */
+    clearHistory() {
+        if (confirm('Are you sure you want to clear all session history? This cannot be undone.')) {
+            this.history.clear();
+            this.populateHistory();
+            this.notifications.show('History cleared');
+        }
     }
 
     /**
@@ -1034,7 +1727,9 @@ class ReliefTimer {
      */
     populateSettings() {
         document.getElementById('profile').value = this.settings.profile;
+        document.getElementById('theme').value = this.settings.theme;
         document.getElementById('soundEnabled').checked = this.settings.soundEnabled;
+        document.getElementById('soundType').value = this.settings.soundType;
         document.getElementById('soundVolume').value = this.settings.soundVolume;
         document.getElementById('volumeValue').textContent = `${Math.round(this.settings.soundVolume * 100)}%`;
         document.getElementById('notificationsEnabled').checked = this.settings.notificationsEnabled;
@@ -1048,7 +1743,9 @@ class ReliefTimer {
      */
     saveSettings() {
         this.settings.profile = document.getElementById('profile').value;
+        this.settings.theme = document.getElementById('theme').value;
         this.settings.soundEnabled = document.getElementById('soundEnabled').checked;
+        this.settings.soundType = document.getElementById('soundType').value;
         this.settings.soundVolume = parseFloat(document.getElementById('soundVolume').value);
         this.settings.notificationsEnabled = document.getElementById('notificationsEnabled').checked;
         this.settings.autoStartBreaks = document.getElementById('autoStartBreaks').checked;
@@ -1058,8 +1755,12 @@ class ReliefTimer {
         // Apply profile
         this.settings.applyProfile();
 
+        // Apply theme
+        this.applyTheme();
+
         // Update notification manager
         this.notifications.setVolume(this.settings.soundVolume);
+        this.notifications.setSoundType(this.settings.soundType);
 
         // Reset timer to apply new times
         if (!this.state.isRunning) {

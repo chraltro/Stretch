@@ -3,7 +3,7 @@
  * Provides offline functionality and caching
  */
 
-const CACHE_NAME = 'hvila-v3-enhanced';
+const CACHE_NAME = 'hvila-v4-ultimate';
 const STATIC_CACHE_URLS = [
     './',
     './index.html',
