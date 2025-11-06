@@ -4,7 +4,7 @@
     border-radius: 20px;
     padding: 40px 30px;
     width: 100%;
-    max-width: 380px;
+    max-width: 420px;
     box-shadow: 0 0 0 1px var(--border-primary),
                 0 10px 40px var(--shadow-primary);
     position: relative;
@@ -417,25 +417,26 @@ header h1 {
 
 .controls {
     display: flex;
-    gap: 12px;
+    gap: 8px;
     justify-content: center;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
 }
 
 button {
     background: transparent;
     border: 1px solid var(--border-secondary);
     color: var(--text-muted);
-    padding: 14px 28px;
+    padding: 12px 20px;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     -webkit-appearance: none;
     appearance: none;
+    flex-shrink: 0;
 }
 
 button:hover,
@@ -551,19 +552,35 @@ button.primary:focus {
     .container {
         padding: 30px 20px;
         margin: 10px;
+        max-width: 100%;
     }
-    
+
     .time {
         font-size: 72px;
     }
-    
+
     .controls {
-        flex-wrap: wrap;
-        justify-content: center;
+        gap: 6px;
     }
-    
+
     button {
-        min-width: 120px;
+        padding: 10px 16px;
+        font-size: 12px;
+        flex: 1;
+        min-width: 70px;
+        max-width: 100px;
+    }
+
+    button.primary {
+        flex: 1.5;
+        max-width: 120px;
+    }
+
+    #settingsBtn {
+        padding: 10px 14px;
+        font-size: 14px;
+        flex: 0.8;
+        max-width: 60px;
     }
 }
 
@@ -788,6 +805,33 @@ button.primary:focus {
     margin-bottom: 8px;
 }
 
+/* Custom Timer Settings */
+.custom-timer-settings {
+    background: var(--surface-overlay);
+    border: 1px solid var(--border-primary);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+    animation: slideIn 0.3s ease;
+}
+
+.custom-timer-title {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent-primary);
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+.custom-timer-settings .setting-group {
+    margin-bottom: 16px;
+}
+
+.custom-timer-settings .setting-group:last-child {
+    margin-bottom: 0;
+}
+
 .setting-group label input[type="checkbox"] {
     margin-right: 8px;
     cursor: pointer;
@@ -884,8 +928,9 @@ button.primary:focus {
 #settingsBtn {
     background: transparent;
     border: 1px solid var(--border-secondary);
-    padding: 14px 20px;
-    font-size: 18px;
+    padding: 12px 16px;
+    font-size: 16px;
+    min-width: auto;
 }
 
 #settingsBtn:hover {
