@@ -3,14 +3,16 @@
  * Provides offline functionality and caching
  */
 
-const CACHE_NAME = 'relief-timer-v2';
+const CACHE_NAME = 'hvila-v4-ultimate';
 const STATIC_CACHE_URLS = [
     './',
     './index.html',
     './css/styles.css',
+    './shared/theme.css',
     './js/app.js',
     './manifest.json',
-    './icons/logo.svg'
+    './icons/logo.svg',
+    './wayfinder_logo.svg'
 ];
 
 // Install event - cache static assets
