@@ -805,6 +805,33 @@ button.primary:focus {
     margin-bottom: 8px;
 }
 
+/* Custom Timer Settings */
+.custom-timer-settings {
+    background: var(--surface-overlay);
+    border: 1px solid var(--border-primary);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+    animation: slideIn 0.3s ease;
+}
+
+.custom-timer-title {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent-primary);
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+.custom-timer-settings .setting-group {
+    margin-bottom: 16px;
+}
+
+.custom-timer-settings .setting-group:last-child {
+    margin-bottom: 0;
+}
+
 .setting-group label input[type="checkbox"] {
     margin-right: 8px;
     cursor: pointer;

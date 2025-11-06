@@ -1418,6 +1418,26 @@ class ReliefTimer {
                                     </select>
                                 </div>
 
+                                <div id="customTimerSettings" class="custom-timer-settings" style="display: none;">
+                                    <h4 class="custom-timer-title">Custom Timer Durations</h4>
+                                    <div class="setting-group">
+                                        <label for="customWorkTime">Work Session (minutes)</label>
+                                        <input type="number" id="customWorkTime" name="customWorkTime" min="1" max="120" value="25">
+                                    </div>
+                                    <div class="setting-group">
+                                        <label for="customMicroBreak">Micro Break (minutes)</label>
+                                        <input type="number" id="customMicroBreak" name="customMicroBreak" min="1" max="30" value="2">
+                                    </div>
+                                    <div class="setting-group">
+                                        <label for="customExerciseBreak">Exercise Break (minutes)</label>
+                                        <input type="number" id="customExerciseBreak" name="customExerciseBreak" min="1" max="60" value="5">
+                                    </div>
+                                    <div class="setting-group">
+                                        <label for="customLongBreak">Long Break (minutes)</label>
+                                        <input type="number" id="customLongBreak" name="customLongBreak" min="1" max="60" value="15">
+                                    </div>
+                                </div>
+
                                 <div class="setting-group">
                                     <label for="theme">Theme</label>
                                     <select id="theme" name="theme">
@@ -1558,6 +1578,14 @@ class ReliefTimer {
             // Play preview
             if (this.settings.soundEnabled) {
                 this.notifications.sound?.play().catch(() => {});
+            }
+        });
+
+        // Profile change - show/hide custom timer settings
+        document.getElementById('profile')?.addEventListener('change', (e) => {
+            const customSettings = document.getElementById('customTimerSettings');
+            if (customSettings) {
+                customSettings.style.display = e.target.value === 'custom' ? 'block' : 'none';
             }
         });
     }
@@ -1736,6 +1764,18 @@ class ReliefTimer {
         document.getElementById('autoStartBreaks').checked = this.settings.autoStartBreaks;
         document.getElementById('autoStartWork').checked = this.settings.autoStartWork;
         document.getElementById('dailyGoal').value = this.settings.dailyGoal;
+
+        // Populate custom timer values
+        document.getElementById('customWorkTime').value = Math.round(this.settings.customTimes.workTime / 60);
+        document.getElementById('customMicroBreak').value = Math.round(this.settings.customTimes.microBreak / 60);
+        document.getElementById('customExerciseBreak').value = Math.round(this.settings.customTimes.exerciseBreak / 60);
+        document.getElementById('customLongBreak').value = Math.round(this.settings.customTimes.longBreak / 60);
+
+        // Show/hide custom timer settings based on profile
+        const customSettings = document.getElementById('customTimerSettings');
+        if (customSettings) {
+            customSettings.style.display = this.settings.profile === 'custom' ? 'block' : 'none';
+        }
     }
 
     /**
@@ -1751,6 +1791,17 @@ class ReliefTimer {
         this.settings.autoStartBreaks = document.getElementById('autoStartBreaks').checked;
         this.settings.autoStartWork = document.getElementById('autoStartWork').checked;
         this.settings.dailyGoal = parseInt(document.getElementById('dailyGoal').value);
+
+        // Save custom timer values
+        if (this.settings.profile === 'custom') {
+            this.settings.customTimes = {
+                name: 'Custom',
+                workTime: parseInt(document.getElementById('customWorkTime').value) * 60,
+                microBreak: parseInt(document.getElementById('customMicroBreak').value) * 60,
+                exerciseBreak: parseInt(document.getElementById('customExerciseBreak').value) * 60,
+                longBreak: parseInt(document.getElementById('customLongBreak').value) * 60
+            };
+        }
 
         // Apply profile
         this.settings.applyProfile();
